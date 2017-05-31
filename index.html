@@ -6,14 +6,36 @@
   </head>
   <body>
     <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+    A new timestamp should render every 5 seconds - updated via SSE from 'https://sse.now.sh/'<br/>
+    Clicking this <a href="https://github.com/electron/electron/releases/download/v1.6.10/electron-api.json">download link</a> should not break the EventSource.
+
+    <p/>
+    <span>current EventSource.readyState: </span><span id="state"></span>
+    <p>timer events:</p>
+    <p id="events"></p>
   </body>
 
   <script>
-    // You can also require other files to run in this process
-    require('./renderer.js')
+    var eventsDiv = document.querySelector('#events');
+    var stateDiv = document.querySelector('#state');
+
+    function log(message) {
+      eventsDiv.innerHTML = message + '<br />' + eventsDiv.innerHTML;
+    }
+
+    var source = new EventSource('https://sse.now.sh/');
+
+    source.onmessage = function(e) {
+      log(e.data);
+    };
+    source.onerror = function(e) {
+      log(`got onerror for EventSource - current readyState is: ${source.readyState}`);
+    };
+
+    function logState() {
+      stateDiv.innerHTML = source.readyState;
+    }
+    logState();
+    setInterval(logState, 1000 * 2);
   </script>
 </html>
